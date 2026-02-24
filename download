@@ -1,0 +1,2 @@
+PORT=5000
+MONGO_URI=mongodb+srv://poornasindhuja2006_db_user:Sindhuja_2006@sindhuja.trjiypz.mongodb.net/safepulse
