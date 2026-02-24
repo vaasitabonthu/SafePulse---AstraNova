@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f3c4c, #1f566b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container {
+    width: 900px;
+    height: 520px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.left-panel {
+    flex: 1;
+    background: linear-gradient(135deg, #123d4e, #2c6d84);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
+}
+
+.left-panel h1 {
+    font-size: 42px;
+    margin-bottom: 20px;
+}
+
+.left-panel p {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.right-panel {
+    flex: 1;
+    background: #e8eef2;
+    padding: 40px;
+    overflow-y: auto;   /* ✅ enables vertical scroll */
+    max-height: 100%;
+}
+
+.right-panel h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1f566b;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input, select {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #c9d8e2;
+    font-size: 14px;
+}
+
+label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #123d4e;
+}
+
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #2c6d84;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #1f566b;
+}
+
+.login-text {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.dashboard-container {
+    padding: 40px;
+    background: linear-gradient(135deg, #0f3c4c, #1f566b);
+    min-height: 100vh;
+    color: white;
+}
+
+.card {
+    background: rgba(255,255,255,0.15);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}

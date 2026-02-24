@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SafePulse - Worker Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <h2>Welcome, {{ request.args.get('name') }}</h2>
+
+    <div class="card">
+        <label>Work Duration (Hours):</label>
+        <input type="number" id="workHours" placeholder="Enter hours worked today">
+    </div>
+
+    <div class="card">
+        <label>Health Symptoms:</label><br>
+        <input type="checkbox" value="headache"> Headache<br>
+        <input type="checkbox" value="dizziness"> Dizziness<br>
+        <input type="checkbox" value="fatigue"> Fatigue<br>
+        <input type="checkbox" value="breathing"> Breathing Issues<br>
+    </div>
+
+    <div class="card">
+        <h3>Environmental Data</h3>
+        <p id="location">Fetching location...</p>
+        <p id="temperature">Temperature: --</p>
+        <p id="aqi">AQI: --</p>
+    </div>
+
+    <div class="card">
+        <h3 id="riskLevel">Risk Level: --</h3>
+    </div>
+
+</div>
+
+<script>
+
+const WEATHER_API_KEY = "8eca01d0ffa6620e8d19b16f7ca750e7";
+const AQI_API_KEY = "8eca01d0ffa6620e8d19b16f7ca750e7";  // same key
+
+function calculateRisk(temp, aqi) {
+    let risk = "Low";
+
+    if (temp > 38 || aqi > 150) {
+        risk = "High";
+    } else if (temp > 32 || aqi > 80) {
+        risk = "Moderate";
+    }
+
+    document.getElementById("riskLevel").innerHTML = 
+        "Risk Level: " + risk;
+}
+
+function fetchEnvironmentalData(lat, lon) {
+
+    // Temperature API
+    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`)
+    .then(res => res.json())
+    .then(data => {
+        let temp = data.main.temp;
+        document.getElementById("temperature").innerHTML = 
+            "Temperature: " + temp + " °C";
+
+        // AQI API
+        fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${AQI_API_KEY}`)
+        .then(res => res.json())
+        .then(aqiData => {
+            let aqi = aqiData.list[0].main.aqi * 50; // scale approx
+            document.getElementById("aqi").innerHTML = 
+                "AQI: " + aqi;
+
+            calculateRisk(temp, aqi);
+        });
+
+    });
+}
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+
+        document.getElementById("location").innerHTML =
+            "Location detected";
+
+        fetchEnvironmentalData(lat, lon);
+    });
+}
+
+</script>
+
+</body>
+</html>

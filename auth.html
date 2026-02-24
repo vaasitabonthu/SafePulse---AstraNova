@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SafePulse - Safety Monitoring System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="main-container">
+
+    <!-- Left Side -->
+    <div class="left-panel">
+        <h1>SafePulse</h1>
+        <p>Safety Monitoring System</p>
+    </div>
+
+    <!-- Right Side -->
+    <div class="right-panel">
+        <h2>Sign Up</h2>
+
+        <form method="POST" action="/signup">
+
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+
+            <!-- Signing As -->
+            <label>Signing As:</label>
+            <select name="role" required>
+                <option value="">Select Role</option>
+                <option value="worker">Worker</option>
+                <option value="supervisor">Supervisor</option>
+            </select>
+
+            <!-- Area -->
+            <select name="area" required>
+                <option value="">Select Area</option>
+                <option value="Site A">Site A</option>
+                <option value="Site B">Site B</option>
+                <option value="Site C">Site C</option>
+            </select>
+
+            <!-- Company -->
+            <input type="text" name="company" placeholder="Construction Company Name">
+
+            <!-- Supervisor Code (only for supervisor) -->
+            <input type="text" name="access_code" placeholder="Supervisor Access Code">
+
+            <button type="submit">Create Account</button>
+
+            <form method="POST" action="/signup"></form>
+
+            <p class="login-text">
+                Already have an account? <a href="login.html">Login</a>
+            </p>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

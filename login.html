@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SafePulse - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="main-container">
+
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <h1>SafePulse</h1>
+        <p>Safety Monitoring System</p>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <h2>Login</h2>
+
+        <form method="POST" action="/login">
+
+            <input type="text" name="name" placeholder="Full Name" required>
+
+            <label>Signing As:</label>
+            <select name="role" required>
+                <option value="">Select Role</option>
+                <option value="worker">Worker</option>
+                <option value="supervisor">Supervisor</option>
+            </select>
+
+            <select name="area" required>
+                <option value="">Select Area</option>
+                <option value="Site A">Site A</option>
+                <option value="Site B">Site B</option>
+                <option value="Site C">Site C</option>
+            </select>
+
+            <input type="text" name="access_code" placeholder="Access Code" required>
+
+            <button type="submit">Login</button>
+
+            <p class="login-text">
+                Don't have an account?
+                <a href="auth.html">Sign Up</a>
+            </p>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>
