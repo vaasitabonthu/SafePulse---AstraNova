@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SafePulse - Worker Monitoring</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="header">
+<button class="logout-btn" onclick="logout()">Logout</button>
+
+<button class="mode-btn" onclick="toggleMode()" id="modeIcon">
+<i class="fas fa-moon"></i>
+</button>
+
+<h1 id="greeting"></h1>
+
+<p>SafePulse monitors your environment and health in real time
+using live weather and air quality data.</p>
+</div>
+
+<div class="section">
+
+<div class="card">
+<h3>Worker Monitoring Form</h3>
+
+<label>Site Area</label>
+<input type="text" id="siteArea"
+placeholder="Block A / Floor 3">
+
+<label>Work Duration (hours)</label>
+<input type="number" id="hours">
+
+<label>Symptoms</label>
+<select id="symptoms" onchange="checkOtherSymptom()">
+<option value="none">None</option>
+<option value="fatigue">Fatigue</option>
+<option value="breathing">Breathing Difficulty</option>
+<option value="dizziness">Dizziness</option>
+<option value="other">Other</option>
+</select>
+
+<input type="text" id="otherSymptom"
+placeholder="Describe other symptom"
+style="display:none;">
+
+<button class="submit-btn"
+onclick="calculateRisk()">Generate Risk Report</button>
+</div>
+
+<div class="card">
+<h3>Live Environmental Data</h3>
+<p>Temperature: <span id="envTemp">Loading...</span></p>
+<p>AQI: <span id="aqi">Loading...</span></p>
+</div>
+
+<div class="card">
+<h3>Risk Assessment</h3>
+<p>Risk Score: <span id="riskScore">0</span>/100</p>
+<div class="risk-bar">
+<div class="risk-fill" id="riskFill"></div>
+</div>
+<p id="riskLevel"></p>
+<p id="recommendation"></p>
+</div>
+
+</div>
+
+<footer>
+© 2026 SafePulse | Real-Time Occupational Monitoring
+</footer>
+
+<script>
+
+const API_KEY = "2d86fd7fab960b8024275bf8672edc32";
+
+let temperature = 0;
+let airQuality = 1;
+
+const currentUser =
+JSON.parse(localStorage.getItem("currentUser"));
+
+
+if (!currentUser || currentUser.role !== "worker") {
+window.location.href = "index.html";
+}
+
+document.getElementById("greeting").innerText =
+"Hello " + currentUser.name + " 👷";
+
+// Get Location + Weather + AQI
+navigator.geolocation.getCurrentPosition(position => {
+
+const lat = position.coords.latitude;
+const lon = position.coords.longitude;
+
+// Weather API
+fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`)
+.then(res => res.json())
+.then(data => {
+temperature = data.main.temp;
+document.getElementById("envTemp").innerText =
+temperature + " °C";
+});
+
+// AQI API
+fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`)
+.then(res => res.json())
+.then(data => {
+airQuality = data.list[0].main.aqi;
+document.getElementById("aqi").innerText =
+airQuality;
+});
+
+});
+
+function checkOtherSymptom() {
+const val =
+document.getElementById("symptoms").value;
+const box =
+document.getElementById("otherSymptom");
+
+box.style.display =
+val === "other" ? "block" : "none";
+}
+
+function calculateRisk() {
+
+let hours =
+parseInt(document.getElementById("hours").value) || 0;
+let symptoms =
+document.getElementById("symptoms").value;
+let otherSymptom =
+document.getElementById("otherSymptom").value;
+let siteArea =
+document.getElementById("siteArea").value;
+
+if (!siteArea.trim()) {
+alert("Enter site area");
+return;
+}
+
+let score = 0;
+
+score += hours * 5;
+if (temperature > 35) score += 20;
+if (airQuality >= 4) score += 25;
+if (symptoms !== "none") score += 20;
+if (symptoms === "other" &&
+otherSymptom.trim() !== "") score += 25;
+
+if (score > 100) score = 100;
+
+document.getElementById("riskScore").innerText =
+score;
+document.getElementById("riskFill").style.width =
+score + "%";
+
+let level = "";
+let recommendation = "";
+
+if (score < 40) {
+level = "Low Risk";
+document.getElementById("riskFill").style.background =
+"green";
+recommendation =
+"You are safe to continue working.";
+}
+else if (score < 70) {
+level = "Moderate Risk";
+document.getElementById("riskFill").style.background =
+"orange";
+recommendation =
+"Take breaks and stay hydrated.";
+}
+else {
+level = "High Risk";
+document.getElementById("riskFill").style.background =
+"red";
+recommendation =
+"Stop work and inform supervisor immediately.";
+}
+
+document.getElementById("riskLevel").innerText =
+level;
+document.getElementById("recommendation").innerText =
+recommendation;
+
+fetch("http://localhost:5000/submit-report", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        name: currentUser.name,
+        gender: currentUser.gender,
+        siteArea: siteArea,
+        hours: hours,
+        riskScore: score,
+        riskLevel: level,
+        temperature: temperature,
+        airQuality: airQuality
+    })
+})
+.then(res => res.json())
+.then(data => {
+    console.log("Report Saved:", data);
+})
+.catch(err => {
+    console.log("Error:", err);
+});
+
+}
+
+function toggleMode() {
+document.body.classList.toggle("light-mode");
+const icon =
+document.getElementById("modeIcon").firstElementChild;
+
+if (document.body.classList.contains("light-mode")) {
+icon.classList.remove("fa-moon");
+icon.classList.add("fa-sun");
+} else {
+icon.classList.remove("fa-sun");
+icon.classList.add("fa-moon");3333333
+}
+}
+
+function logout() {
+localStorage.removeItem("currentUser");
+window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
