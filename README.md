@@ -1,8 +1,11 @@
 Safepulse is a occupational health monitoring site for the informal workers which is build in the form of both website and an app
 SafePulse is a simple yet powerful mobile-based safety platform designed to protect informal workers who face daily risks at construction sites,mines, factories, roads, and other hazardous workplaces. Many of these workers lack access to health monitoring systems, and small health issues or environmental dangers often go unnoticed until they become serious emergencies.
+
 SafePulse aims to change that by shifting workplace safety from preventing them before they happen and prevents lead to income loss and long-term disability.
 The platform includes a worker mobile app and a supervisor dashboard. The app collects basic health inputs (such as fatigue or symptoms) along with environmental data like temperature and air quality using reliable weather and pollution APIs. This data is analyzed by a built-in risk engine that predicts possible dangers based on current conditions and past patterns.
 If the system detects high heat stress, hazardous air quality, or signs of worker exhaustion, it immediately sends alerts to both workers and supervisors. This allows quick action—such as taking breaks, adjusting shifts, or avoiding unsafe zones—before the situation turns critical. The system is also designed to work in low-connectivity areas, making it practical for real-world field environments.After calculating the risk, SafePulse shows nearby hospitals with direct map access in one click for quick medical assistance.
+
 Unlike many existing safety platforms that focus mainly on incident reporting, SafePulse emphasizes early detection and preventive safety. It follows a software-first approach, making it affordable and scalable without requiring expensive hardware.
+
 In the future, the platform can integrate wearable devices and AI-based predictive models for even more accurate risk forecasting.
 Overall, SafePulse empowers workers and supervisors with real-time insights and early warnings, helping reduce injuries, prevent income loss, and create safer, healthier workplaces.
