@@ -1,0 +1,251 @@
+/* ===============================
+   SafePulse Common Theme CSS
+================================= */
+
+:root {
+    --bg1: #0D273D;
+    --bg2: #3E6985;
+    --card: #CDD7DF;
+    --text-dark: #0D273D;
+    --primary: #3E6985;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: white;
+    transition: 0.4s ease;
+}
+
+/* Light Mode */
+body.light-mode {
+    background: #f4f7fa;
+    color: #0D273D;
+}
+
+/* ===============================
+   HEADER
+================================= */
+
+.header {
+    padding: 50px 40px;
+    text-align: center;
+    position: relative;
+}
+
+.intro-text {
+    max-width: 800px;
+    margin: 15px auto 0;
+    font-size: 17px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
+.mode-btn {
+    position: absolute;
+    right: 40px;
+    top: 40px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logout-btn {
+    position: absolute;
+    left: 40px;
+    top: 40px;
+    padding: 8px 14px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ===============================
+   LAYOUT SECTIONS
+================================= */
+
+.section {
+    padding: 30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* ===============================
+   CARDS
+================================= */
+
+.card {
+    background: var(--card);
+    color: var(--text-dark);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ===============================
+   FORMS
+================================= */
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+    background: #A6BED1;
+    outline: none;
+}
+
+button.submit-btn {
+    padding: 12px;
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ===============================
+   TABLE
+================================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #999;
+    text-align: center;
+}
+
+th {
+    background: var(--primary);
+    color: white;
+}
+
+/* Risk Colors */
+
+.high { color: red; font-weight: bold; }
+.medium { color: orange; font-weight: bold; }
+.low { color: green; font-weight: bold; }
+
+/* ===============================
+   RISK BAR
+================================= */
+
+.risk-bar {
+    height: 15px;
+    border-radius: 10px;
+    background: #ddd;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.risk-fill {
+    height: 100%;
+    width: 0%;
+    background: green;
+    transition: 0.5s;
+}
+
+/* ===============================
+   ALERT SUMMARY
+================================= */
+
+.alert-box {
+    padding: 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* ===============================
+   FOOTER
+================================= */
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.2);
+    margin-top: 40px;
+}
+
+/* ===============================
+   NEARBY HOSPITALS LIST
+================================= */
+
+.hospital-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.hospital-item {
+    background: #A6BED1;
+    color: #0D273D;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    font-size: 14px;
+}
+
+.hospital-item.muted {
+    opacity: 0.7;
+    text-align: center;
+}
+
+.hospital-name {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.hospital-name i {
+    margin-right: 6px;
+    color: #0D273D;
+}
+
+.hospital-address {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.hospital-meta {
+    font-size: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    opacity: 0.9;
+}
+
+.dot-separator {
+    opacity: 0.6;
+}

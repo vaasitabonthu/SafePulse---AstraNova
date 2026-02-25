@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SafePulse - Worker Monitoring</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="header">
+<button class="logout-btn" onclick="logout()">Logout</button>
+
+<button class="mode-btn" onclick="toggleMode()" id="modeIcon">
+<i class="fas fa-moon"></i>
+</button>
+
+<h1 id="greeting"></h1>
+<p>SafePulse monitors your environment and health in real time.</p>
+</div>
+
+<div class="section">
+
+<!-- Worker Form -->
+<div class="card">
+<h3>Worker Monitoring Form</h3>
+
+<label>Site Area</label>
+<input type="text" id="siteArea">
+
+<label>Work Duration (hours)</label>
+<input type="number" id="hours">
+
+<label>Symptoms</label>
+<select id="symptoms">
+<option value="none">None</option>
+<option value="fatigue">Fatigue</option>
+<option value="breathing">Breathing Difficulty</option>
+<option value="dizziness">Dizziness</option>
+</select>
+
+<button class="submit-btn" onclick="calculateRisk()">
+Generate Risk Report
+</button>
+</div>
+
+<!-- Live Environmental Data -->
+<div class="card">
+<h3>Live Environmental Data</h3>
+<p>Temperature: <span id="envTemp">Loading...</span></p>
+<p>AQI: <span id="aqi">Loading...</span></p>
+</div>
+
+<!-- Risk Assessment -->
+<div class="card">
+<h3>Risk Assessment</h3>
+<p>Risk Score: <span id="riskScore">0</span>/100</p>
+
+<div style="background:#ddd;height:15px;border-radius:10px;">
+<div id="riskFill"
+style="height:100%;width:0%;border-radius:10px;"></div>
+</div>
+
+<p id="riskLevel"></p>
+<p id="recommendation"></p>
+</div>
+
+<!-- Nearby Hospitals -->
+<div class="card hidden" id="hospitalCard">
+<h3>Nearby Medical Support</h3>
+<p id="hospitalStatus">Waiting for risk assessment...</p>
+<button class="submit-btn"
+onclick="loadNearbyHospitals()">Refresh</button>
+<div id="hospitalList"></div>
+</div>
+
+</div>
+
+<footer>
+© 2026 SafePulse
+</footer>
+
+<script>
+
+const API_KEY = "YOUR_OPENWEATHER_API_KEY";
+
+let temperature = 0;
+let airQuality = 1;
+let userLat = null;
+let userLon = null;
+
+const currentUser =
+JSON.parse(localStorage.getItem("currentUser"));
+
+if (!currentUser || currentUser.role !== "worker") {
+window.location.href = "index.html";
+}
+
+document.getElementById("greeting").innerText =
+"Hello " + currentUser.name + " 👷";
+
+
+// =======================
+// LOCATION + ENV DATA
+// =======================
+
+navigator.geolocation.getCurrentPosition(position => {
+
+userLat = position.coords.latitude;
+userLon = position.coords.longitude;
+
+// Weather
+fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${userLat}&lon=${userLon}&appid=${API_KEY}&units=metric`)
+.then(res => res.json())
+.then(data => {
+temperature = data.main.temp;
+document.getElementById("envTemp").innerText =
+temperature + " °C";
+});
+
+// AQI
+fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${userLat}&lon=${userLon}&appid=${API_KEY}`)
+.then(res => res.json())
+.then(data => {
+airQuality = data.list[0].main.aqi;
+document.getElementById("aqi").innerText =
+airQuality;
+});
+
+}, () => {
+document.getElementById("envTemp").innerText =
+"Location blocked";
+document.getElementById("aqi").innerText =
+"Location blocked";
+});
+
+
+// =======================
+// RISK CALCULATION
+// =======================
+
+function calculateRisk() {
+
+let hours =
+parseInt(document.getElementById("hours").value) || 0;
+
+let symptoms =
+document.getElementById("symptoms").value;
+
+let score = 0;
+
+score += hours * 5;
+
+if (temperature >= 35) score += 20;
+if (temperature >= 38) score += 30;
+
+if (airQuality >= 3) score += 20;
+if (airQuality >= 4) score += 30;
+
+if (symptoms !== "none") score += 20;
+
+if (score > 100) score = 100;
+
+let level = "";
+let recommendation = "";
+let color = "";
+
+if (score < 40) {
+level = "Low";
+recommendation = "Safe to continue.";
+color = "green";
+}
+else if (score < 70) {
+level = "Moderate";
+recommendation = "Take breaks and hydrate.";
+color = "orange";
+}
+else {
+level = "High";
+recommendation = "Seek medical support immediately.";
+color = "red";
+}
+
+document.getElementById("riskScore").innerText = score;
+document.getElementById("riskFill").style.width = score + "%";
+document.getElementById("riskFill").style.background = color;
+document.getElementById("riskLevel").innerText = level;
+document.getElementById("recommendation").innerText = recommendation;
+
+if (score >= 40) {
+document.getElementById("hospitalCard")
+.classList.remove("hidden");
+loadNearbyHospitals();
+}
+
+}
+
+
+// =======================
+// HOSPITAL SYSTEM
+// =======================
+
+function loadNearbyHospitals() {
+
+if (!userLat || !userLon) {
+alert("Location not available");
+return;
+}
+
+fetchHospitals(userLat, userLon);
+}
+
+async function fetchHospitals(lat, lon) {
+
+const radius = 5000;
+
+const query = `
+[out:json];
+node["amenity"~"hospital|clinic|pharmacy"](around:${radius},${lat},${lon});
+out;
+`;
+
+const url =
+"https://overpass-api.de/api/interpreter?data=" +
+encodeURIComponent(query);
+
+const status =
+document.getElementById("hospitalStatus");
+
+status.innerText = "Searching nearby facilities...";
+
+try {
+
+const response = await fetch(url);
+const data = await response.json();
+
+displayHospitals(data.elements, lat, lon);
+
+} catch {
+status.innerText = "Unable to load hospitals.";
+}
+
+}
+
+function displayHospitals(hospitals, userLat, userLon) {
+
+const list =
+document.getElementById("hospitalList");
+
+if (!hospitals.length) {
+list.innerHTML = "No facilities found.";
+return;
+}
+
+const sorted = hospitals.map(h => {
+
+const distance =
+calculateDistance(userLat, userLon,
+h.lat, h.lon);
+
+return {
+name: h.tags.name || "Unnamed Facility",
+lat: h.lat,
+lon: h.lon,
+distance
+};
+
+}).sort((a,b)=>a.distance-b.distance);
+
+list.innerHTML = "";
+
+sorted.slice(0,6).forEach((h,index)=>{
+
+const div = document.createElement("div");
+
+div.style.padding="10px";
+div.style.margin="10px 0";
+div.style.borderRadius="8px";
+div.style.cursor="pointer";
+
+if(index===0){
+div.style.background="#ffe0e0";
+div.innerHTML=
+"⭐ <strong>"+h.name+"</strong><br>"+
+h.distance.toFixed(2)+" km (Nearest)";
+}
+else{
+div.style.background="#f2f2f2";
+div.innerHTML=
+"<strong>"+h.name+"</strong><br>"+
+h.distance.toFixed(2)+" km";
+}
+
+div.onclick=()=>{
+window.open(
+`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`,
+"_blank"
+);
+};
+
+list.appendChild(div);
+
+});
+
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+
+const R = 6371;
+const dLat = (lat2-lat1)*Math.PI/180;
+const dLon = (lon2-lon1)*Math.PI/180;
+
+const a =
+Math.sin(dLat/2)**2 +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
+Math.sin(dLon/2)**2;
+
+return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+
+}
+
+
+// =======================
+// UI
+// =======================
+
+function toggleMode() {
+document.body.classList.toggle("light-mode");
+}
+
+function logout() {
+localStorage.removeItem("currentUser");
+window.location.href = "index.html";
+}
+
+</script>
+</body>
+</html>

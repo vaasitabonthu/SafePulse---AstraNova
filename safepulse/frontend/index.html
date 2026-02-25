@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SafePulse - Construction Access</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0D273D, #3E6985);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    width: 950px;
+    height: 550px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+}
+
+.left-panel {
+    flex: 1;
+    background: linear-gradient(160deg, #0D273D, #3E6985);
+    color: white;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.left-panel h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.left-panel p {
+    font-size: 18px;
+    opacity: 0.85;
+}
+
+.right-panel {
+    flex: 1;
+    background: #CDD7DF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px);
+    padding: 35px;
+    width: 360px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #0D273D;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #A6BED1;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #3E6985;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0D273D;
+}
+
+.toggle {
+    text-align: center;
+    margin-top: 15px;
+    cursor: pointer;
+    color: #0D273D;
+    font-size: 14px;
+}
+
+.error {
+    font-size: 13px;
+    color: red;
+    min-height: 18px;
+}
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left-panel">
+    <h1>SafePulse</h1>
+    <p>Protecting Workers.<br>Empowering Supervisors.</p>
+</div>
+
+<div class="right-panel">
+<div class="card">
+
+<h2 id="formTitle">Login</h2>
+
+<input type="text" id="name" placeholder="Full Name" class="hidden">
+
+<select id="gender" class="hidden">
+    <option value="">Select Gender</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+</select>
+
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<input type="password" id="confirmPassword" placeholder="Confirm Password" class="hidden">
+
+<select id="role">
+    <option value="worker">Worker</option>
+    <option value="supervisor">Supervisor</option>
+</select>
+
+<select id="area" class="hidden">
+    <option value="Site A">Construction Site A</option>
+    <option value="Site B">Construction Site B</option>
+    <option value="Site C">Construction Site C</option>
+</select>
+
+<input type="text" id="supervisorCode"
+placeholder="Supervisor Access Code"
+class="hidden">
+
+<div class="error" id="errorMsg"></div>
+
+<button onclick="handleAuth()" id="actionBtn">Login</button>
+
+<div class="toggle" onclick="toggleForm()">
+    Don't have an account? Sign Up
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+
+const AREA_CODES = {
+    "Site A": "SITEA26",
+    "Site B": "SITEB26",
+    "Site C": "SITEC26"
+};
+
+let isLogin = true;
+
+function toggleForm() {
+    isLogin = !isLogin;
+
+    document.getElementById("name").classList.toggle("hidden");
+    document.getElementById("gender").classList.toggle("hidden");
+    document.getElementById("confirmPassword").classList.toggle("hidden");
+    document.getElementById("area").classList.toggle("hidden");
+
+    const title = document.getElementById("formTitle");
+    const btn = document.getElementById("actionBtn");
+    const toggleText = document.querySelector(".toggle");
+    const errorMsg = document.getElementById("errorMsg");
+
+    errorMsg.innerText = "";
+    errorMsg.style.color = "red";
+
+    if (isLogin) {
+        title.innerText = "Login";
+        btn.innerText = "Login";
+        toggleText.innerText = "Don't have an account? Sign Up";
+    } else {
+        title.innerText = "Sign Up";
+        btn.innerText = "Create Account";
+        toggleText.innerText = "Already have an account? Login";
+    }
+    document.getElementById("supervisorCode")
+    .classList.add("hidden");
+}
+
+document.getElementById("role").addEventListener("change", function () {
+
+    const supervisorInput =
+        document.getElementById("supervisorCode");
+
+    if (isLogin && this.value === "supervisor") {
+        supervisorInput.classList.remove("hidden");
+    } else {
+        supervisorInput.classList.add("hidden");
+    }
+});
+
+function handleAuth() {
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const errorMsg = document.getElementById("errorMsg");
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    errorMsg.innerText = "";
+if (isLogin) {
+
+    const selectedRole =
+        document.getElementById("role").value;
+
+    const enteredCode =
+        document.getElementById("supervisorCode").value;
+
+    const user = users.find(u =>
+        u.email === email &&
+        u.password === password
+    );
+
+    if (!user) {
+        errorMsg.innerText =
+            "Invalid email or password.";
+        return;
+    }
+
+    // Check role matches
+    if (user.role !== selectedRole) {
+        errorMsg.innerText =
+            "Selected role does not match account.";
+        return;
+    }
+
+    // If supervisor, verify access code
+    if (selectedRole === "supervisor") {
+
+        if (enteredCode !== user.supervisorAccessCode) {
+            errorMsg.innerText =
+                "Invalid Supervisor Access Code.";
+            return;
+        }
+
+        localStorage.setItem(
+            "currentUser",
+            JSON.stringify(user)
+        );
+
+        window.location.href =
+            "supervisor-dashboard.html";
+
+    } else {
+
+        localStorage.setItem(
+            "currentUser",
+            JSON.stringify(user)
+        );
+
+        window.location.href =
+            "worker-dashboard.html";
+    }
+}
+     else {
+
+        const name = document.getElementById("name").value.trim();
+        const gender = document.getElementById("gender").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const role = document.getElementById("role").value;
+        const area = document.getElementById("area").value;
+
+        if (!name) {
+            errorMsg.innerText = "Name is required.";
+            return;
+        }
+
+        if (!gender) {
+            errorMsg.innerText = "Please select gender.";
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMsg.innerText = "Passwords do not match.";
+            return;
+        }
+
+        
+
+        if (users.find(u => u.email === email)) {
+            errorMsg.innerText = "User already exists.";
+            return;
+        }
+        let generatedCode = null;
+
+if (role === "supervisor") {
+    generatedCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+}
+        users.push({
+    name,
+    gender,
+    email,
+    password,
+    role,
+    area,
+    supervisorAccessCode: generatedCode
+});
+        localStorage.setItem("users", JSON.stringify(users));
+
+errorMsg.style.color = "green";
+
+if (role === "supervisor") {
+
+    alert(
+        "Your Supervisor Access Code is: " +
+        generatedCode +
+        "\n\nPlease save this code. You will need it to login."
+    );
+
+    errorMsg.innerText =
+        "Account created successfully! Please login.";
+
+} else {
+
+    errorMsg.innerText =
+        "Account created successfully! Please login.";
+}
+
+toggleForm();
+    }
+}
+
+</script>
+
+</body>
+</html>

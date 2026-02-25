@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SafePulse - Supervisor Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.chart-small {
+    width: 280px !important;
+    height: 280px !important;
+    margin: 0 auto;
+}
+
+.chart-large {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.high-row {
+    background: #ffe0e0;
+}
+
+.moderate-row {
+    background: #fff4cc;
+}
+
+.low-row {
+    background: #e6ffe6;
+}
+
+.alert-box {
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<button class="logout-btn" onclick="logout()">Logout</button>
+<h1 id="greeting"></h1>
+<p>Monitor worker risk levels and take preventive action.</p>
+</div>
+
+<div class="section">
+
+<div class="card">
+<h3>Risk Level Distribution</h3>
+<canvas id="riskPie" class="chart-small"></canvas>
+</div>
+
+<div class="card">
+<h3>All Workers Overview</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Site Area</th>
+<th>Risk Score</th>
+<th>Risk Level</th>
+</tr>
+</thead>
+<tbody id="workerTable"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>Risk Score Comparison</h3>
+<canvas id="riskBar" class="chart-large"></canvas>
+</div>
+
+<div id="alertSummary" class="alert-box"></div>
+
+</div>
+
+<footer>
+© 2026 SafePulse | Supervisor Control Panel
+</footer>
+
+<script>
+
+const currentUser =
+JSON.parse(localStorage.getItem("currentUser"));
+
+if (!currentUser || currentUser.role !== "supervisor") {
+window.location.href = "index.html";
+}
+
+document.getElementById("greeting").innerText =
+"Hello " + currentUser.name + " 👨‍💼";
+
+loadDashboard();
+
+async function loadDashboard() {
+
+try {
+
+const response =
+await fetch("http://localhost:5000/api/workers/all");
+
+const workers = await response.json();
+
+renderTable(workers);
+renderCharts(workers);
+renderSummary(workers);
+
+} catch (err) {
+console.error("Error loading dashboard:", err);
+}
+
+}
+
+// =======================
+// TABLE
+// =======================
+
+function renderTable(workers) {
+
+const table =
+document.getElementById("workerTable");
+
+table.innerHTML = "";
+
+workers.forEach(worker => {
+
+let rowClass = "";
+
+if (worker.riskLevel === "High")
+rowClass = "high-row";
+else if (worker.riskLevel === "Moderate")
+rowClass = "moderate-row";
+else
+rowClass = "low-row";
+
+table.innerHTML += `
+<tr class="${rowClass}">
+<td>${worker.name}</td>
+<td>${worker.location}</td>
+<td>${worker.riskScore}</td>
+<td>${worker.riskLevel}</td>
+</tr>
+`;
+
+});
+
+}
+
+// =======================
+// CHARTS
+// =======================
+
+function renderCharts(workers) {
+
+let high =
+workers.filter(w => w.riskLevel === "High").length;
+
+let moderate =
+workers.filter(w => w.riskLevel === "Moderate").length;
+
+let low =
+workers.filter(w => w.riskLevel === "Low").length;
+
+// Pie Chart
+new Chart(document.getElementById("riskPie"), {
+type: "pie",
+data: {
+labels: ["High", "Moderate", "Low"],
+datasets: [{
+data: [high, moderate, low],
+backgroundColor: ["red", "orange", "green"]
+}]
+},
+options: { responsive: true }
+});
+
+// Bar Chart
+new Chart(document.getElementById("riskBar"), {
+type: "bar",
+data: {
+labels: workers.map(w => w.name),
+datasets: [{
+label: "Risk Score",
+data: workers.map(w => w.riskScore),
+backgroundColor: "#3E6985"
+}]
+},
+options: {
+responsive: true,
+scales: {
+y: {
+beginAtZero: true,
+max: 100
+}
+}
+}
+});
+
+}
+
+// =======================
+// SITE STATUS SUMMARY
+// =======================
+
+function renderSummary(workers) {
+
+const alertBox =
+document.getElementById("alertSummary");
+
+if (!workers.length) {
+alertBox.innerText = "No worker data available.";
+alertBox.style.background = "#ccc";
+return;
+}
+
+let avg =
+workers.reduce((sum, w) =>
+sum + w.riskScore, 0) / workers.length;
+
+if (avg < 40) {
+alertBox.style.background = "green";
+alertBox.innerText =
+"Overall Site Status: SAFE";
+}
+else if (avg < 70) {
+alertBox.style.background = "orange";
+alertBox.innerText =
+"Overall Site Status: MODERATE RISK";
+}
+else {
+alertBox.style.background = "red";
+alertBox.innerText =
+"Overall Site Status: HIGH RISK";
+}
+
+}
+
+// =======================
+// LOGOUT
+// =======================
+
+function logout() {
+localStorage.removeItem("currentUser");
+window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
